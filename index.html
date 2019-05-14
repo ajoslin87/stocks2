@@ -12,6 +12,7 @@
 <script src = "midi.js"></script>
   </head>
   <body>
+  <div id = "myDiv" >
     <input type="file"
        id="avatar" name="avatar"
        accept=".csv" onchange ="fileAdded()"/>
@@ -22,19 +23,24 @@
     <input type="date" id = "dateStart" onchange = "changeDateRange()"/>
     <input type="date" id = "dateEnd" onchange = "changeDateRange()"/>
 <br>
-
+    <button id = "populate" onclick = "populate()"></button>
 
     <select id="prezi" onchange = "addBar()">
       <option value="default">default</option>
     </select>
 
-    <select id="lini" onchange = "addLine()">
+      <select id="select" onchange = "addBar()">
+          <option value="default">default</option>
+      </select>
+
+      <select id="lini" onchange = "addLine()">
       <option value="default">default</option>
     </select>
     <br>
 <label for="midi">Number : </label><input id="midi" type="number" min="0" max="127" step="1" value ="0" onchange = "midiDate()"/>
 <br>
 <p id = "Datehtml"></p>
+  </div>
  <script src="data.js" type="text/javascript"></script>
   <script src="index.js" type="text/javascript"></script>
   <script src ="addShapes.js" type="text/javascript"></script>

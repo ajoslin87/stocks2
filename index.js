@@ -76,29 +76,41 @@ String.prototype.removeWord = function(searchWord){
     return str;
 }
 
-
+var readIt;
 
 var fileAdded = function(){
 
   file = document.getElementById("avatar").files[0];
   //d3fileObject = d3.csv(file.name)
 
+    console.log(file);
 
-  //files2.push(file);
-  console.log(file);
-  //console.log(files2);
+      d3.csv(file.name).then(function(result){
 
-
-
-
-      // function readIt(data){
-        d3.csv(file.name).then(function(result){
-           console.log(result)
+           readIt = result.columns;
+           console.log(readIt);
     })
+
 
 }
 
 
+var populate = function(){
+    var columnSelect =[];
+    var select = document.getElementById("select");
+
+    for(var i=0; i<readIt.length; i++){
+
+
+        var option = document.createElement("option"),
+            txt = document.createTextNode(readIt[i]);
+        option.appendChild(txt);
+        option.setAttribute("value",columnSelect[i]);
+       // columnSelect.push(readIt[i]);
+        select.insertBefore(option,select.lastChild);
+    }
+    console.log("hello")
+}
 
 
 files.forEach(function(url) {
