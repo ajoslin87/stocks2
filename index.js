@@ -1,6 +1,7 @@
 var aapl = [];
 var aaplDates =[];
 var dayOver = [];
+var aaplSelect =[];
 
 var parseDate = d3.timeParse("%Y-%m-%d");
 var prezParse = d3.timeParse("%d/%m/%Y");
@@ -20,13 +21,13 @@ myFunc = function(d) {
 }
 
 var margin = {
-    top: 30,
+    top: 75,
     right: 20,
     bottom: 30,
     left: 50
   },
   width = 600 - margin.left - margin.right,
-  height = 270 - margin.top - margin.bottom;
+  height = 315 - margin.top - margin.bottom;
 
 // Set the ranges
 var x = d3.scaleTime().range([0, width]);
@@ -38,10 +39,10 @@ var xAxis = d3.axisBottom().scale(x)
   .ticks(5);
 
 var yAxis = d3.axisLeft().scale(y)
-  .ticks(5);
+  .ticks(8);
 
 // Define the line
-var valueline
+var valueline;
 
 // var valueline1 = d3.line()
 //   .x(function(d){
@@ -123,9 +124,9 @@ Promise.all(promises).then(function(data) {
   //console.log("data", data[1]);
   data[0].forEach(function(d) {
     d.date = parseDate(d.date);
-    d.close = +d.close;
+   // d.close = +d.close;
+   // d.High = +d.High;
   });
- console.log
   data[1].forEach(function(d){
     d.Took_office = prezParse(d.Took_office)
     d.Left_office = prezParse(d.Left_office)
@@ -143,9 +144,9 @@ Promise.all(promises).then(function(data) {
   for (i = 0; i < data[0].length; i++) {
 
     aapl.push(data[0][i]);
-    aaplDates.push(aapl[i].date)
+    aaplDates.push(aapl[i].date);
   };
-  //console.log(aapl);
+
 
   for(i=0; i<data[1].length; i++ ){
     prez.push(data[1][i].President)
@@ -193,17 +194,30 @@ var lini = document.getElementById("lini");
 });
 Promise.all(promises).then(function(data) {
 
-var i = 0;
+    i = 0;
 
 addLine = function(){
   // Add the valueline path.
 
-theVal = lini.value
-console.log(theVal);
+var theVal = lini.value
+console.log(theVal,i);
+aaplSelect.length = 0;
+    for (let j = 0; j < aapl.length; j++) {
 
-y.domain([0, d3.max(data[0], function(d) {
-  return d[theVal];
-})]);
+        aaplSelect.push(+aapl[j][theVal]);
+
+    }
+
+
+maxSelectValue = d3.max(data[0],function(d){
+    return (+d[theVal]);
+})
+
+    console.log(maxSelectValue);
+console.log(aaplSelect);
+console.log(aaplSelect.indexOf(+maxSelectValue));
+
+y.domain([0, maxSelectValue]);
 
 
 dateStart =parseDate(document.getElementById("dateStart").value);
@@ -221,7 +235,7 @@ if(dateEnd ==null){
 
 x.domain([dateStart, dateEnd]);
 
-valueline = d3.line()
+valueline= d3.line()
   .x(function(d) {
     return x(d.date);
   })
@@ -230,7 +244,7 @@ valueline = d3.line()
   })
 
 
-if(i==0){
+if(i===0){
   svg.append("g")
     .attr("class", "y axis")
     .transition(6000)
@@ -244,14 +258,13 @@ if(i==0){
 
 }
 
-  var  lines = svg.selectAll("path")
+   svg.selectAll("path"[i])
   .data(data[0]).enter().append("path").transition().duration(7000)
     .attr("class", "line")
     .attr("d", valueline(data[0]))
 
     .style("fill", "none")
-    .style("stroke", "#000")
-    ;
+    .style("stroke", "#000");
 
   i++
 };
