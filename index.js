@@ -2,10 +2,12 @@ var aapl = [];
 var aaplDates =[];
 var dayOver = [];
 var aaplSelect =[];
+var columnSelect =[];
 
 var parseDate = d3.timeParse("%Y-%m-%d");
 var prezParse = d3.timeParse("%d/%m/%Y");
 var goldDate = d3.timeParse("%Y-%m");
+//var dateEnd;
 
 var adate;
 
@@ -77,45 +79,57 @@ String.prototype.removeWord = function(searchWord){
     return str;
 }
 
-var readIt;
+let readIt;
 
-var fileAdded = function(){
+const fileAdded = function(){
 
   file = document.getElementById("avatar").files[0];
   //d3fileObject = d3.csv(file.name)
 
     console.log(file);
 
-      d3.csv(file.name).then(function(result){
+      d3.csv(file.name).then(function(result) {
 
-           readIt = result.columns;
-           console.log(readIt);
-    })
+          readIt = result.columns;
+          //readItLc  = readIt.toLowerCase()
+          console.log(readIt)
+          console.log(result[0].date);
+          for (i = 0; i < result.length; i++) {
+              loadFiles.push(result[i]);
+              //console.log(loadFiles[i].date);
+          }
+          console.log(d3.min(loadFiles, d=> d.date));
+          console.log(d3.max(loadFiles, d=> d.date));
+      })
 
 
 }
 
 
-var populate = function(){
+const populate = function(){
     var columnSelect =[];
-    var select = document.getElementById("select");
+    var mySelection = document.getElementById("mySelection");
 
     for(var i=0; i<readIt.length; i++){
-
-
         var option = document.createElement("option"),
             txt = document.createTextNode(readIt[i]);
         option.appendChild(txt);
-        option.setAttribute("value",columnSelect[i]);
+        option.setAttribute("value",readIt[i]);
        // columnSelect.push(readIt[i]);
-        select.insertBefore(option,select.lastChild);
+        mySelection.insertBefore(option,mySelection.lastChild);
     }
-    console.log("hello")
-}
+    console.log(mySelection)
+
+    Promise.all(loadFiles).then(function(data){
+        console.log(data[0]);
+    })
+
+};
 
 
 files.forEach(function(url) {
   promises.push(d3.csv(url))
+    console.log(url);
 });
 
 
@@ -139,7 +153,7 @@ Promise.all(promises).then(function(data) {
 
   columns = data[0].columns;
 
-  console.log(data[1]);
+  //console.log(data[1]);
 
   for (i = 0; i < data[0].length; i++) {
 
@@ -181,140 +195,275 @@ var lini = document.getElementById("lini");
 });
 
 
-  Promise.all(promises).then(function(data) {
+  Promise.all(loadFiles).then(function(data) {
 
   // Scale the range of the data
 
-  //x.domain([parseDate('2008-10-27'), parseDate('2009-02-16')]);
+  x.domain([parseDate('2008-10-27'), parseDate('2009-02-16')]);
 
 
 
-  //y.domain([0, 50]);
-
-});
-Promise.all(promises).then(function(data) {
-
-    i = 0;
-
-addLine = function(){
-  // Add the valueline path.
-
-var theVal = lini.value
-console.log(theVal,i);
-aaplSelect.length = 0;
-    for (let j = 0; j < aapl.length; j++) {
-
-        aaplSelect.push(+aapl[j][theVal]);
-
-    }
-
-
-maxSelectValue = d3.max(data[0],function(d){
-    return (+d[theVal]);
-})
-
-    console.log(maxSelectValue);
-console.log(aaplSelect);
-console.log(aaplSelect.indexOf(+maxSelectValue));
-
-y.domain([0, maxSelectValue]);
-
-
-dateStart =parseDate(document.getElementById("dateStart").value);
-dateEnd = parseDate(document.getElementById("dateEnd").value);
-
-
-if(dateStart==null){
-  dateStart = (data[0][0].date)
- //console.log(dateStart)
-}
-
-if(dateEnd ==null){
-  dateEnd =((data[0][data[0].length-1]).date)
-}
-
-x.domain([dateStart, dateEnd]);
-
-valueline= d3.line()
-  .x(function(d) {
-    return x(d.date);
-  })
-  .y(function(d) {
-    return y(d[theVal]);
-  })
-
-
-if(i===0){
-  svg.append("g")
-    .attr("class", "y axis")
-    .transition(6000)
-    .call(yAxis);
-
-    svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")").transition()
-
-      .call(xAxis);
-
-}
-
-   svg.selectAll("path"[i])
-  .data(data[0]).enter().append("path").transition().duration(7000)
-    .attr("class", "line")
-    .attr("d", valueline(data[0]))
-
-    .style("fill", "none")
-    .style("stroke", "#000");
-
-  i++
-};
-
-
-changeDateRange = function(){
-
-  dateStart = parseDate(document.getElementById("dateStart").value)
-  dateEnd = parseDate(document.getElementById("dateEnd").value)
-
-console.log("date Start ",dateStart);
-console.log("date end" ,dateEnd);
-
-  if(dateStart==null){
-    dateStart = (data[0][0]).date
-   console.log("date Start", dateStart)
-  console.log("fuck your Haircut")
-  }
-
-  if(dateEnd ==null){
-    dateEnd =(data[0][data[0].length-1]).date
-    console.log("date End", dateEnd)
-  }
-
-  var svg = d3.select("body").transition();
-
-
-console.log("date End", dateEnd)
-console.log("date Start", dateStart)
-
-   x.domain([dateStart, dateEnd]);
-
-  svg.select(".line")
-  .attr("d", valueline(data[0]))
-  svg.select(".x")
-    .transition()
-      .call(xAxis)
-
-      ;
-
-
-}
-
-update =  function() {
-  			x.domain([0, Math.random(10, 10000)]);
-
-  			svg.select(".x")
-  				.transition()
-  					.call(xAxis);
-
-  		}
+  y.domain([0, 50]);
 
 });
+
+  addLine2 = function () {
+
+      //var theVal
+      Promise.all(loadFiles).then(function (data) {
+          //i = 0;
+
+          // Add the valueline path.
+          console.log(data)
+          //addLine();
+
+
+          theVal2 = mySelection.value
+          console.log(theVal2);
+
+          //aaplSelect.length = 0;
+          for (let j = 0; j < loadFiles.length; j++) {
+
+              columnSelect.push(+loadFiles[j][theVal2]);
+
+
+              //console.log(columnSelect);
+
+
+              maxSelectValue = d3.max(data, function (d) {
+                  return (+d[theVal2]);
+              });
+          }
+          console.log(maxSelectValue);
+          console.log(aaplSelect);
+//console.log(aaplSelect.indexOf(+maxSelectValue));
+
+          y.domain([0, maxSelectValue]);
+
+
+
+
+      dateStart = parseDate(document.getElementById("dateStart").value);
+      dateEnd = parseDate(document.getElementById("dateEnd").value);
+
+
+      //if (dateStart == null) {
+           startDate = (data[0].date)
+          console.log(startDate);
+      //}
+
+      //if (dateEnd == null) {
+          endDate = ((data[data.length - 1]).date)
+          console.log(endDate)
+      //}
+
+      x.domain([parseDate(startDate), parseDate(endDate)]);
+
+      valueline = d3.line()
+          .x(function (data) {
+              return x(parseDate(data.date));
+          })
+          .y(function (data) {
+              return y(data[theVal2]);
+          })
+
+
+//if(i===0){
+      svg.append("g")
+          .attr("class", "y axis")
+          .transition(6000)
+          .call(yAxis);
+
+      svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")").transition()
+          .call(xAxis);
+
+//}
+
+      svg.append("path")
+          .data([data])//.enter().append("path")//.transition().duration(7000)
+          .attr("class", "line")
+          .attr("d", valueline)
+          .style("fill", "none")
+          .style("stroke", "#000");
+
+  })
+    };
+
+//  var addLine = function(){
+//   /* Add the valueline path.*/
+//
+//      theVal = lini.value
+// console.log(theVal,i);
+// aaplSelect.length = 0;
+//     for (let j = 0; j < aapl.length; j++) {
+//
+//         aaplSelect.push(+aapl[j][theVal]);
+//
+//     }
+//
+//
+// maxSelectValue = d3.max(data,function(d){
+//     return (+d[theVal]);
+// });
+//
+// console.log(maxSelectValue);
+// console.log(aaplSelect);
+// //console.log(aaplSelect.indexOf(+maxSelectValue));
+//
+// y.domain([0, maxSelectValue]);
+//
+//
+// dateStart =parseDate(document.getElementById("dateStart").value);
+// dateEnd = parseDate(document.getElementById("dateEnd").value);
+//
+//
+// if(dateStart==null){
+//   dateStart = (data[0][0].date)
+//  console.log(data[0]);
+// }
+//
+// if(dateEnd ==null) {
+//     dateEnd = ((data[0][data[0].length - 1]).date)
+//
+//
+//     x.domain([dateStart, dateEnd]);
+//
+//     valueline = d3.line()
+//         .x(function (d) {
+//             return x(+d.date);
+//         })
+//         .y(function (d) {
+//             return y(d[theVal]);
+//         })
+//
+// }
+// //if(i===0){
+//   svg.append("g")
+//     .attr("class", "y axis")
+//     .transition(6000)
+//     .call(yAxis);
+//
+//     svg.append("g")
+//       .attr("class", "x axis")
+//       .attr("transform", "translate(0," + height + ")").transition()
+//
+//       .call(xAxis);
+
+//}
+
+//    svg.selectAll("path"[i])
+//   .data(data[0]).enter().append("path").transition().duration(7000)
+//     .attr("class", "line")
+//     .attr("d", valueline(data[0]))
+//     .style("fill", "none")
+//     .style("stroke", "#000");
+//
+//   i++
+// };
+
+//dateEnd =(data.length-1).date
+
+
+//     changeDateRange = function(){
+//
+//
+//
+//         aaplDate2=[];
+//
+//     for (let j = 0; j < aapl.length; j++) {
+//
+//         aaplDate2.push(+aapl[j].date);
+//
+//     }
+//
+//   dateEnd1 =dateEnd;
+//
+//   dateStart1 = parseDate(document.getElementById("dateStart").value);
+//
+//     if(dateStart1==null) {
+//         closestStart = (dateFns.closestTo((dateStart).getTime(), aaplDates));
+//         startString = closestStart.toString();
+//         startIndex = aaplDates.findIndex(function (index) {
+//             return index == startString;
+//         });
+//     }else{
+//         closestStart = (dateFns.closestTo((dateStart1).getTime(), aaplDates));
+//         startString = closestStart.toString();
+//         startIndex = aaplDates.findIndex(function (index) {
+//             return index == startString;
+//         });
+//     }
+//   dateEnd1 = parseDate(document.getElementById("dateEnd").value);
+//
+//         if (dateEnd1 == null) {
+//     //parseEnd = new Date(dateEnd);
+//     closestEnd = (dateFns.closestTo((dateEnd).getTime(), aaplDates));
+//     endString = closestEnd.toString();
+//     endIndex = aaplDates.findIndex(function (index) {
+//         return index == endString;
+//     });
+//         }else{
+//         closestEnd = (dateFns.closestTo((dateEnd1).getTime(), aaplDates));
+//         endString = closestEnd.toString();
+//         endIndex = aaplDates.findIndex(function (index) {
+//                 return index == endString;
+//             });
+//         };
+//   console.log(startString);
+//   console.log(startIndex);
+//   console.log(endString);
+//   console.log(endIndex);
+//
+//   //console.log("date Start ",dateStart);
+//     // console.log("date end" ,dateEnd);
+//
+//         adjustedData = data[0].slice(startIndex,endIndex);
+//
+//   if(dateStart==null){
+//     dateStart = (data[0][0]).date
+//    console.log("date Start", dateStart)
+//   console.log("fuck your Haircut")
+//   }
+//
+//     if(dateEnd == null){
+//         dateEnd =(data[0].length-1).date
+//         console.log("date End", dateEnd)
+//     }
+//
+//   var svg = d3.select("body").transition();
+//
+//   //console.log("date Start", dateStart);
+//   //console.log("date End", dateEnd);
+//
+//
+//    x.domain(d3.extent([closestStart, closestEnd]));
+//     y.domain([0, maxSelectValue]);
+//
+//
+//   svg.select(".line")
+//   .attr("d", valueline(adjustedData))
+//       .attr(["width",width])
+//       .attr(["height",height])
+//       .style("fill", "none")
+//       .style("stroke", "#e70c29")
+//       .attr('x', 0);
+//   svg.select(".x")
+//     .transition()
+//       .call(xAxis)
+//
+//       ;
+//
+//
+// }
+
+// update =  function() {
+//   			x.domain([0, Math.random(10, 10000)]);
+//
+//   			svg.select(".x")
+//   				.transition()
+//   					.call(xAxis);
+//
+//   		}
+
